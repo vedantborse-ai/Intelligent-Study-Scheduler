@@ -1,0 +1,177 @@
+:root {
+  /* --- THEME: Cyberpunk Neon --- */
+  --neon-cyan: #00fff9;
+  --neon-pink: #ff00ff;
+  --neon-purple: #bd00ff;
+  --bg-dark: #050508;
+  --bg-panel: rgba(20, 20, 35, 0.75); /* Slightly darker for readability */
+  --text-primary: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.6);
+
+  /* Animation Curves */
+  --bounce-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --snappy-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  font-family: 'Rajdhani', sans-serif;
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--bg-dark);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg-dark) 80%);
+  overflow-x: hidden;
+}
+
+/* --- Background Grid --- */
+.bg-grid {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-image: 
+    linear-gradient(rgba(0, 255, 249, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 249, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+  transform: perspective(1000px) rotateX(60deg) scale(2);
+  transform-origin: top center;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+}
+
+/* --- Main HUD Container --- */
+.game-hud-container {
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid var(--neon-cyan);
+  border-bottom: 2px solid var(--neon-pink);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 500px; /* Slightly wider for the form */
+  position: relative;
+  overflow: hidden;
+  animation: slideUpFade 0.8s var(--bounce-ease) backwards;
+}
+
+/* Decor corners */
+.game-hud-container::before { content: ''; position: absolute; top:0; left:0; width:30px; height:30px; background:var(--neon-cyan); clip-path: polygon(0 0, 100% 0, 0 100%); }
+.game-hud-container::after { content: ''; position: absolute; bottom:0; right:0; width:30px; height:30px; background:var(--neon-pink); clip-path: polygon(100% 100%, 100% 0, 0 100%); }
+
+/* --- Headers & Profile --- */
+.profile-section { display: flex; align-items: center; gap: 1.5rem; }
+.avatar-container { position: relative; width: 70px; height: 70px; flex-shrink: 0; }
+.avatar-glow {
+  position: absolute; inset: -5px; border-radius: 50%;
+  background: conic-gradient(var(--neon-cyan), var(--neon-pink), var(--neon-cyan));
+  animation: spin-glow 4s linear infinite; filter: blur(10px); opacity: 0.7;
+}
+.avatar { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid white; position: relative; z-index: 2; background: #000; }
+.player-info h1 {
+  margin: 0; font-size: 1.8rem; font-weight: 800; letter-spacing: 2px;
+  background: linear-gradient(to right, var(--neon-cyan), #fff);
+  -webkit-background-clip: text; color: transparent;
+}
+.level-badge {
+  display: inline-block; background: var(--neon-pink); color: white;
+  padding: 2px 8px; font-size: 0.8rem; font-weight: 700; transform: skewX(-10deg);
+  margin-top: 5px; box-shadow: 0 0 10px var(--neon-pink);
+}
+
+/* --- Stats --- */
+.stats-container { display: flex; flex-direction: column; gap: 10px; }
+.stat-row { display: flex; flex-direction: column; gap: 5px; }
+.stat-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.progress-bar-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative; }
+.progress-bar-fill { height: 100%; position: relative; transition: width 1s ease; }
+.progress-bar-fill.cyan { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+.progress-bar-fill.pink { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+
+/* --- Forms (Cyber Inputs) --- */
+.task-form { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.cyber-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 249, 0.3);
+  color: var(--neon-cyan);
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+.cyber-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 255, 249, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+}
+.cyber-input::placeholder { color: rgba(0, 255, 249, 0.4); }
+
+/* Customizing the date input calendar icon */
+.cyber-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) hue-rotate(180deg);
+    cursor: pointer;
+}
+
+/* --- Buttons --- */
+.actions-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+
+.cyber-button {
+  border: none; background: transparent; padding: 0; cursor: pointer;
+  position: relative; width: 100%; height: 50px;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  font-family: 'Rajdhani'; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px;
+  color: var(--neon-cyan);
+  background: linear-gradient(90deg, transparent 5%, rgba(0, 255, 249, 0.1) 50%, transparent 95%);
+  border: 1px solid rgba(0, 255, 249, 0.3);
+  transition: all 0.3s var(--bounce-ease);
+}
+.cyber-button.secondary { color: var(--neon-pink); border-color: rgba(255, 0, 255, 0.3); background: linear-gradient(90deg, transparent 5%, rgba(255, 0, 255, 0.1) 50%, transparent 95%); }
+.cyber-button.danger { color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3); }
+
+.cyber-button:hover { transform: scale(1.02); background: rgba(0, 255, 249, 0.15); border-color: var(--neon-cyan); color: white; text-shadow: 0 0 8px var(--neon-cyan); }
+.cyber-button.secondary:hover { background: rgba(255, 0, 255, 0.15); border-color: var(--neon-pink); color: white; text-shadow: 0 0 8px var(--neon-pink); }
+
+/* --- Task List --- */
+.task-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+/* Scrollbar styling */
+.task-list::-webkit-scrollbar { width: 6px; }
+.task-list::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 3px; }
+
+.task-card {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 4px solid var(--neon-purple);
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  transition: 0.3s;
+}
+.task-card:hover { background: rgba(255, 255, 255, 0.05); transform: translateX(5px); }
+.task-info h3 { margin: 0; font-size: 1.1rem; color: white; }
+.task-info p { margin: 0; font-size: 0.85rem; color: var(--text-dim); }
+
+.mini-actions { display: flex; gap: 8px; }
+.icon-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.2); color: var(--text-dim);
+  width: 30px; height: 30px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: 0.2s;
+}
+.icon-btn.check:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+.icon-btn.trash:hover { border-color: #ff4d4d; color: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+
+/* Animations */
+@keyframes slideUpFade { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin-glow { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
