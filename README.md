@@ -8,6 +8,8 @@ Unlike traditional task managers, SmartSchedule uses a deterministic scheduling 
 
 The system is built with a production-ready architecture, containerized using Docker, and deployed via a CI/CD pipeline.
 
+**🔗 Live Demo:** [https://smartschedule-x8py.onrender.com](https://smartschedule-x8py.onrender.com)
+
 ---
 
 ## 🚀 Key Features
