@@ -1,11 +1,17 @@
 import os
 from datetime import datetime, timezone
+from dateutil.parser import parse as parse_date
 
 def ai_decision(tasks):
-    now=datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
     for task in tasks:
+        try:
+            deadline = parse_date(task.deadline)
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone.utc)
+        except Exception:
+            deadline = now
 
-        deadline = datetime.fromisoformat(task.deadline.replace("Z", "+00:00"))
         hours_left = (deadline - now).total_seconds() / 3600
 
         # 🔥 Urgency Boost

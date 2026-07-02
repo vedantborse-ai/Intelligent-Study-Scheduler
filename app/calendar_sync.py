@@ -7,7 +7,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from zoneinfo import ZoneInfo
 from google.oauth2.credentials import Credentials
-from datetime import timedelta
+from datetime import timedelta, timezone
 from dateutil.parser import isoparse
 from .models import OAuthCredential
 
@@ -51,11 +51,33 @@ def push_to_google_calendar(schedule, credentials):
 
         for task in schedule:
             title = task.get("task")
-            start_time = task["start"].astimezone(IST)
-            end_time = task["end"].astimezone(IST)
+            
+            # Ensure datetime is timezone-aware
+            start_time = task["start"]
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(tzinfo=timezone.utc)
+            start_time = start_time.astimezone(IST)
+
+            end_time = task["end"]
+            if end_time.tzinfo is None:
+                end_time = end_time.replace(tzinfo=timezone.utc)
+            end_time = end_time.astimezone(IST)
+
+            # Delete old event if it exists to avoid duplicates
+            old_event_id = task.get("google_event_id")
+            if old_event_id:
+                try:
+                    service.events().delete(
+                        calendarId="primary",
+                        eventId=old_event_id
+                    ).execute()
+                    logger.info(f"Deleted old event: {old_event_id}")
+                except Exception as ex:
+                    logger.warning(f"Could not delete old event {old_event_id}: {ex}")
 
             event = {
                 "summary": title,
+                "description": "Scheduled by SmartSchedule AI Engine",
                 "start": {
                     "dateTime": start_time.isoformat(),
                     "timeZone": IST_TIMEZONE
@@ -75,7 +97,8 @@ def push_to_google_calendar(schedule, credentials):
 
             created_events.append({
                 "title": title,
-                "event_id": event_id
+                "event_id": event_id,
+                "task_id": task.get("task_id")
             })
 
         return created_events
@@ -90,7 +113,7 @@ def load_credentials_from_db(db):
         if not record:
             return None
 
-        return Credentials(
+        creds = Credentials(
             token=record.token,
             refresh_token=record.refresh_token,
             token_uri=record.token_uri,
@@ -98,6 +121,24 @@ def load_credentials_from_db(db):
             client_secret=record.client_secret,
             scopes=json.loads(record.scopes),
         )
+
+        # Auto-refresh if token is expired
+        if creds.expired and creds.refresh_token:
+            try:
+                from google.auth.transport.requests import Request as AuthRequest
+                creds.refresh(AuthRequest())
+                
+                # Update SQLite database record with refreshed token
+                record.token = creds.token
+                if creds.refresh_token:
+                    record.refresh_token = creds.refresh_token
+                db.commit()
+                logger.info("Successfully refreshed and saved Google Calendar token to database")
+            except Exception as re:
+                logger.error(f"Failed to refresh expired token: {re}")
+                # We return the credentials anyway and let it fail gracefully at request time
+                
+        return creds
     except Exception as e:
         logger.error(f"Error loading credentials from DB: {e}")
         return None

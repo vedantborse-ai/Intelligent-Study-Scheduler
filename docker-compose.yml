@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /app/venv
+    environment:
+      - DATABASE_URL=sqlite:///./tasks.db
+      - GOOGLE_CLIENT_ID=placeholder_client_id.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=placeholder_client_secret
+      - GOOGLE_REDIRECT_URI=http://localhost:8000/oauth/callback
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: always

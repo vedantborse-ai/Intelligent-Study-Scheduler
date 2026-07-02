@@ -61,21 +61,32 @@ def schedule_tasks(db: Session = Depends(get_db)):
         if tasks:
             tasks = ai_decision(tasks)
     except Exception as e:
-        print(f"AI Sort Error: {e}")
+        logger.error(f"AI Sort Error: {e}")
         traceback.print_exc()
 
-    # 3. MANUAL JSON CONVERSION (Fixes the [{}] error)
-    response_data = []
-    for t in tasks:
-        response_data.append({
-            "id": t.id,
-            "title": t.title,
-            "priority": t.priority,
-            "estimated_hours": t.estimated_hours,
-            "deadline": t.deadline,
-            "completed": t.completed,
-            "google_event_id": t.google_event_id
-        })
+    # 3. Generate Schedule using scheduling engine
+    try:
+        if tasks:
+            response_data = generate_schedule(tasks)
+        else:
+            response_data = []
+    except Exception as e:
+        logger.error(f"Schedule generation error: {e}")
+        traceback.print_exc()
+        response_data = []
+        for t in tasks:
+            response_data.append({
+                "id": t.id,
+                "title": t.title,
+                "priority": t.priority,
+                "estimated_hours": t.estimated_hours,
+                "deadline": t.deadline,
+                "completed": t.completed,
+                "google_event_id": t.google_event_id,
+                "start_time": datetime.utcnow().isoformat(),
+                "end_time": datetime.utcnow().isoformat(),
+                "conflict": False
+            })
 
     return JSONResponse(content=response_data)
 
@@ -118,6 +129,79 @@ def get_analytics(db: Session = Depends(get_db)):
         "completion_rate": round(completion_rate, 2),
         "weekly_streak": streak
     }
+
+@router.get("/calendar/status")
+def google_calendar_status(db: Session = Depends(get_db)):
+    try:
+        credentials = load_credentials_from_db(db)
+        if credentials:
+            # Let's get the email from the primary calendar
+            try:
+                from googleapiclient.discovery import build
+                service = build("calendar", "v3", credentials=credentials)
+                calendar = service.calendars().get(calendarId="primary").execute()
+                email = calendar.get("id")
+                return {"connected": True, "email": email}
+            except Exception as ex:
+                logger.error(f"Error fetching calendar email: {ex}")
+                return {"connected": True, "email": "Google Connected"}
+        return {"connected": False}
+    except Exception as e:
+        logger.error(f"Error checking calendar status: {e}")
+        return {"connected": False}
+
+@router.post("/calendar/sync")
+def sync_schedule_to_google_calendar(db: Session = Depends(get_db)):
+    try:
+        # 1. Load credentials
+        credentials = load_credentials_from_db(db)
+        if not credentials:
+            return JSONResponse(status_code=401, content={"error": "Not authenticated with Google Calendar"})
+        
+        # 2. Get pending tasks
+        tasks = db.query(Task).filter(Task.completed == False).all()
+        if not tasks:
+            return {"message": "No pending tasks to sync", "synced_count": 0}
+        
+        # 3. Sort tasks with AI engine
+        try:
+            sorted_tasks = ai_decision(tasks)
+        except Exception as e:
+            logger.error(f"AI Sort Error in Sync: {e}")
+            sorted_tasks = tasks
+        
+        # 4. Generate schedule
+        schedule = generate_schedule(sorted_tasks)
+        
+        # 5. Push to Google Calendar
+        formatted_schedule = []
+        for item in schedule:
+            from dateutil.parser import parse as parse_date
+            start_dt = parse_date(item["start_time"])
+            end_dt = parse_date(item["end_time"])
+            
+            formatted_schedule.append({
+                "task": item["title"],
+                "task_id": item["id"],
+                "start": start_dt,
+                "end": end_dt,
+                "google_event_id": item["google_event_id"]
+            })
+            
+        created_events = push_to_google_calendar(formatted_schedule, credentials)
+        
+        # 6. Update database with new event IDs
+        for event in created_events:
+            t_id = event["task_id"]
+            e_id = event["event_id"]
+            db.query(Task).filter(Task.id == t_id).update({"google_event_id": e_id})
+        db.commit()
+        
+        return {"message": f"Successfully synced {len(created_events)} tasks to Google Calendar", "synced_count": len(created_events)}
+    except Exception as e:
+        logger.error(f"Sync error: {e}")
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 # --- OAUTH & UTILS ---
 

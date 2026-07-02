@@ -158,10 +158,51 @@ body {
   align-items: center;
   position: relative;
   transition: 0.3s;
+  border-radius: 4px;
 }
 .task-card:hover { background: rgba(255, 255, 255, 0.05); transform: translateX(5px); }
-.task-info h3 { margin: 0; font-size: 1.1rem; color: white; }
-.task-info p { margin: 0; font-size: 0.85rem; color: var(--text-dim); }
+
+/* Conflict styling for tasks overlapping deadlines */
+.task-card.conflict-card {
+  border-left-color: #ff3333;
+  box-shadow: inset 3px 0 0 rgba(255, 51, 51, 0.4), 0 0 10px rgba(255, 51, 51, 0.15);
+  background: rgba(30, 10, 10, 0.3);
+}
+
+.task-info h3 { margin: 0; font-size: 1.1rem; color: white; text-align: left; }
+.task-info p { margin: 2px 0 0 0; font-size: 0.85rem; color: var(--text-dim); text-align: left; }
+
+.task-info .schedule-time {
+  color: var(--neon-cyan);
+  font-weight: 600;
+  text-shadow: 0 0 5px rgba(0, 255, 249, 0.2);
+}
+
+.task-info .deadline-time {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.conflict-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ff3333;
+  background: rgba(255, 51, 51, 0.15);
+  border: 1px solid rgba(255, 51, 51, 0.3);
+  padding: 1px 6px;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+  animation: pulse-red 2s infinite ease-in-out;
+}
+
+.level-badge.streak {
+  background: #ffaa00;
+  box-shadow: 0 0 10px #ffaa00;
+  margin-left: 5px;
+}
 
 .mini-actions { display: flex; gap: 8px; }
 .icon-btn {
@@ -175,3 +216,103 @@ body {
 /* Animations */
 @keyframes slideUpFade { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
 @keyframes spin-glow { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@keyframes pulse-red {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; box-shadow: 0 0 8px rgba(255, 51, 51, 0.4); }
+}
+
+/* --- Top Glassmorphic Navbar --- */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(10, 10, 20, 0.65);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.nav-brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-accent {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.profile-email {
+  font-size: 0.75rem;
+}
+
+.email-status.connected {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 5px rgba(0, 255, 249, 0.3);
+}
+
+.email-status.disconnected {
+  color: #ff4d4d;
+}
+
+.nav-avatar-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.nav-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  object-fit: cover;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: #39ff14; /* Neon green */
+  border-radius: 50%;
+  border: 2px solid var(--bg-dark);
+  box-shadow: 0 0 8px #39ff14;
+}
+
+/* Adjust page padding for fixed navbar */
+body {
+  padding-top: 90px;
+}
