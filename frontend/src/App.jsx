@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,9 +24,9 @@ function App() {
 
   const refreshData = async () => {
     try {
-      const scheduleRes = await axios.get("http://localhost:8000/schedule");
-      const analyticsRes = await axios.get("http://localhost:8000/analytics");
-      const statusRes = await axios.get("http://localhost:8000/calendar/status");
+      const scheduleRes = await axios.get(`${API_URL}/schedule`);
+      const analyticsRes = await axios.get(`${API_URL}/analytics`);
+      const statusRes = await axios.get(`${API_URL}/calendar/status`);
       
       setTasks(scheduleRes.data);
       setStats(analyticsRes.data);
@@ -54,7 +56,7 @@ function App() {
         deadline: new Date(formData.deadline).toISOString(),
       };
 
-      await axios.post("http://localhost:8000/tasks", formattedData);
+      await axios.post(`${API_URL}/tasks`, formattedData);
       setFormData({ title: "", priority: "", estimated_hours: "", deadline: "" });
       refreshData();
     } catch (error) {
@@ -63,13 +65,13 @@ function App() {
   };
 
   const handleLogin = () => {
-    window.location.href = "http://localhost:8000/oauth/login";
+    window.location.href = `${API_URL}/oauth/login`;
   };
 
   const handleSyncCalendar = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/calendar/sync");
+      const res = await axios.post(`${API_URL}/calendar/sync`);
       alert(res.data.message || "Synced successfully!");
       refreshData();
     } catch (error) {
@@ -82,7 +84,7 @@ function App() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/tasks/${id}`);
+      await axios.delete(`${API_URL}/tasks/${id}`);
       refreshData();
     } catch (error) {
       console.error("Delete failed", error);
@@ -91,7 +93,7 @@ function App() {
 
   const markCompleted = async (id) => {
     try {
-      await axios.patch(`http://localhost:8000/tasks/${id}/complete`);
+      await axios.patch(`${API_URL}/tasks/${id}/complete`);
       refreshData();
     } catch (error) {
       console.error("Completion failed", error);
@@ -101,7 +103,7 @@ function App() {
   const clearAllTasks = async () => {
     if (!window.confirm("Are you sure you want to PURGE all tasks? This cannot be undone.")) return;
     try {
-      await axios.delete("http://localhost:8000/tasks");
+      await axios.delete(`${API_URL}/tasks`);
       refreshData();
     } catch (error) {
       console.error("Clear failed", error);
