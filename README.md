@@ -10,151 +10,71 @@ The system is built with a production-ready architecture, containerized using Do
 
 ---
 
-## 🎯 Problem Statement
-
-Students and professionals often:
-
-- Underestimate task durations  
-- Overload certain days  
-- Manually schedule inefficiently  
-- Miss deadlines due to poor time allocation  
-
-Most task management tools are passive — they store tasks but do not optimize time.
-
-SmartSchedule solves this by:
-
-- Automatically generating optimized schedules  
-- Balancing workload across available time slots  
-- Prioritizing tasks based on urgency and importance  
-- Syncing structured schedules to Google Calendar  
-- Providing analytics on workload distribution  
-
----
-
 ## 🚀 Key Features
 
-### 🔐 Authentication
-
-- Secure JWT-based authentication  
-- User registration & login  
-- Session management  
-
----
+### 🔐 Authentication & Google Calendar Integration
+- OAuth-based Google authentication
+- User session persistence and auto-refresh credentials
+- Two-way schedule visibility with primary calendar email display
+- Automatic creation of calendar events
+- Prevent duplicate calendar entries on rescheduling
 
 ### 📝 Task Management
+- Create tasks with duration, deadline, and priority (1-5 scale)
+- Complete and delete tasks (automatically removes linked calendar events)
+- View pending and scheduled tasks
 
-Users can:
-
-- Create tasks with duration, deadline, and priority  
-- Edit and delete tasks  
-- View pending and scheduled tasks  
-
----
-
-### ⚙️ Scheduling Engine
-
-The system automatically:
-
-- Sorts tasks using priority queues  
-- Allocates time slots before deadlines  
-- Prevents schedule conflicts  
-- Optimizes workload distribution  
-
-Scheduling decisions are deterministic and reproducible.
-
----
-
-### 📅 Google Calendar Integration
-
-- OAuth-based Google authentication  
-- Automatic creation of calendar events  
-- Update/delete synced events  
-- Two-way schedule visibility  
-
----
+### ⚙️ Deterministic Scheduling Engine
+- Sorts tasks using AI priority-queue boosters (e.g. deadline proximity, habits)
+- Allocates time slots sequentially starting from current time
+- Highlights schedule conflicts in the UI if a task's end time overflows its deadline
 
 ### 📊 Dashboard & Analytics
-
-- Weekly calendar visualization  
-- Task distribution charts  
-- Workload heatmap  
-- Schedule summary  
+- Glassmorphic Cyberpunk HUD dashboard UI
+- Real-time weekly streak count (active day tracker)
+- Task completion rates and system load progress bars
 
 ---
 
 ## 🏗️ System Architecture
 
-The system follows a modular SaaS architecture:
+The system follows a modular full-stack architecture:
 
-Frontend (React + TypeScript)  
-→ User interaction & dashboard UI  
-
-Backend (Node.js + Express)  
-→ API layer + scheduling engine  
-
-Database (PostgreSQL)  
-→ Persistent storage for users, tasks, and schedules  
-
-Google Calendar API  
-→ External calendar synchronization  
-
-CI/CD Pipeline (GitHub Actions)  
-→ Automated build, test, and deployment  
-
-Dockerized Environment  
-→ Containerized frontend and backend services  
-
----
-
-## 🧱 Tech Stack
-
-### Frontend
-- React
-- TypeScript
-- Tailwind CSS
-
-### Backend
-- Node.js
-- Express
-- JWT Authentication
-
-### Database
-- PostgreSQL
-
-### DevOps
-- Docker
-- Docker Compose
-- GitHub Actions (CI/CD)
-- Cloud Deployment (Render / Railway / AWS)
+- **Frontend (React + Vite + JS)**: Cyberpunk HUD dashboard UI.
+- **Backend (FastAPI + Python)**: API layer, scheduling engine, and Google API integrations.
+- **Database (SQLite + SQLAlchemy)**: Persistent storage for tasks and OAuth credentials.
+- **CI/CD Pipeline (GitHub Actions)**: Automated code lint, test, build verification, and Docker validation.
 
 ---
 
 ## 📂 Project Structure
 
 ```bash
-📁 smartschedule/
+📁 Intelligent-Study-Scheduler/
 │
-├── 📁 frontend/                         # React + TypeScript client
+├── 📁 frontend/                         # React client
 │   ├── 📁 src/
-│   ├── 📁 public/
-│   └── Dockerfile
+│   │   ├── App.css                      # Cyberpunk styles
+│   │   └── App.jsx                      # Main UI components
+│   ├── Dockerfile                       # Multi-stage production build (Node + Nginx)
+│   └── package.json
 │
-├── 📁 backend/                          # Node.js + Express API
-│   ├── 📁 src/
-│   │   ├── 📁 controllers/              # Request handlers
-│   │   ├── 📁 routes/                   # API route definitions
-│   │   ├── 📁 services/                 # Business logic (scheduler, calendar)
-│   │   ├── 📁 middleware/               # Auth & validation middleware
-│   │   ├── 📁 utils/                    # Helper functions
-│   │   └── server.ts                    # Entry point
-│   └── Dockerfile
+├── 📁 app/                              # FastAPI backend
+│   ├── database.py                      # SQLAlchemy database session setup
+│   ├── models.py                        # DB schema (Task, OAuthCredential)
+│   ├── scheduler.py                     # Deterministic scheduling slot builder
+│   ├── ai_engine.py                     # Urgency and priority booster
+│   ├── calendar_sync.py                 # Google Calendar integration & credential management
+│   ├── routes.py                        # REST API routing
+│   └── main.py                          # FastAPI application launcher
 │
-├── docker-compose.yml                   # Local multi-container setup
-│
-├── 📁 .github/
-│   └── 📁 workflows/
+├── .github/
+│   └── workflows/
 │       └── ci.yml                       # CI/CD pipeline (GitHub Actions)
 │
+├── Dockerfile                           # Backend Python slim Dockerfile
+├── docker-compose.yml                   # Local multi-container compose orchestrator
+├── .env                                 # Configuration and OAuth secret keys
 └── README.md                            # Project documentation
 ```
 
@@ -163,163 +83,53 @@ Dockerized Environment
 ## 🧠 Scheduling Algorithm Overview
 
 The scheduling engine:
-
-1. Sorts tasks by:
-   - Priority level  
-   - Deadline proximity  
-
-2. Uses a greedy time allocation strategy:
-   - Finds available time slots  
-   - Allocates duration blocks  
-   - Ensures deadline compliance  
-
-3. Detects conflicts and rebalances automatically.
-
-Time complexity depends primarily on:
-- Number of tasks
-- Number of available time slots
-
----
-
-## 🐳 DevOps & Deployment
-
-SmartSchedule is production-ready.
-
-### Docker
-- Multi-container architecture  
-- Separate containers for frontend & backend  
-- Environment-based configuration  
-
-### CI/CD Pipeline
-
-GitHub Actions pipeline:
-
-- Runs tests  
-- Builds Docker images  
-- Pushes to registry  
-- Deploys to cloud environment  
-
----
-
-# 📦 API Documentation
-
-All endpoints are prefixed with:
-
----
-
-## 🔐 Authentication
-
-Handles user registration and login.
-
-| Method | Endpoint              | Description            | Auth Required |
-|--------|----------------------|------------------------|--------------|
-| POST   | `/auth/register`     | Register new user      | ❌ No        |
-| POST   | `/auth/login`        | Authenticate user      | ❌ No        |
-
----
-
-## 📝 Task Management
-
-CRUD operations for managing user tasks.
-
-| Method | Endpoint         | Description              | Auth Required |
-|--------|-----------------|--------------------------|--------------|
-| GET    | `/tasks`        | Get all user tasks       | ✅ Yes       |
-| POST   | `/tasks`        | Create a new task        | ✅ Yes       |
-| PUT    | `/tasks/:id`    | Update an existing task  | ✅ Yes       |
-| DELETE | `/tasks/:id`    | Delete a task            | ✅ Yes       |
-
----
-
-## ⚙️ Scheduling
-
-Endpoints related to schedule generation and retrieval.
-
-| Method | Endpoint                  | Description                     | Auth Required |
-|--------|---------------------------|---------------------------------|--------------|
-| POST   | `/schedule/generate`      | Generate optimized schedule     | ✅ Yes       |
-| GET    | `/schedule`               | Retrieve current schedule       | ✅ Yes       |
-
----
-
-## 📅 Calendar Integration
-
-Google Calendar synchronization endpoints.
-
-| Method | Endpoint              | Description                           | Auth Required |
-|--------|-----------------------|---------------------------------------|--------------|
-| POST   | `/calendar/sync`      | Sync schedule with Google Calendar    | ✅ Yes       |
-
----
-
-## 📌 Example Request
-
-### Create Task
-
-```json
-POST /api/tasks
-{
-  "title": "Complete DSA practice",
-  "duration": 120,
-  "deadline": "2026-02-28",
-  "priority": "HIGH"
-}
-```
-
----
-
-## 🔐 Environment Variables
-
-Backend requires:
-DATABASE_URL=
-JWT_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
+1. **Urgency boosting**: Dynamically raises priorities of tasks with upcoming deadlines (<24h and <72h) or overdue status.
+2. **Habit adaptation**: Dynamically scales task duration if historically similar priority levels were delayed.
+3. **Sequential assignment**: Builds slot durations starting from the current time.
+4. **Conflict detection**: Evaluates `end_time > deadline` and marks tasks as conflicting.
 
 ---
 
 ## ▶️ Local Development Setup
 
-1. Clone the repository  
-2. Configure environment variables  
-3. Run:
-   docker-compose up --build
+### 1. Clone the repository & Configure credentials
+Create a `.env` file in the root of the project with your Google API OAuth credentials:
 
+```env
+DATABASE_URL=sqlite:///./tasks.db
+JWT_SECRET=your_jwt_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/oauth/callback
+```
 
-Frontend: http://localhost:3000  
-Backend: http://localhost:5000  
+### 2. Launching via Docker Compose
+To build and launch both services locally:
+```bash
+docker-compose up --build
+```
+- **Frontend App**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **FastAPI OpenAPI docs**: http://localhost:8000/docs
 
 ---
 
-## 🌍 Deployment
+## 🌍 Cloud Deployment (Render)
 
-The application is deployed using:
+### Deploy Backend (Free Web Service)
+1. Link your repository in Render and create a **Web Service**.
+2. Set Runtime to **Docker** (Render uses the root `Dockerfile` to launch the API container).
+3. Set your env variables matching `.env`.
 
-- Docker containers  
-- GitHub Actions CI/CD  
-- Cloud platform hosting  
-
-Live Demo: (Add deployment link here)
-
----
-
-## 📈 Future Improvements
-
-- Adaptive learning from user habits  
-- AI-based duration prediction  
-- Smart break insertion  
-- Mobile responsiveness  
-- Real-time notifications  
+### Deploy Frontend (Free Static Site)
+1. Create a **Static Site** on Render linking the same repository.
+2. Set **Root Directory** to `frontend`.
+3. Set **Build Command** to `npm run build`.
+4. Set **Publish Directory** to `dist`.
+5. Add Env Variable `VITE_API_URL` pointing to your deployed backend URL.
 
 ---
 
 ## 🧑‍💻 Author
 
-Developed as a full-stack SaaS system demonstrating:
-
-- System design
-- Algorithmic scheduling
-- API integration
-- DevOps & CI/CD
-- Production deployment
+Developed as a modern full-stack SaaS system illustrating Docker containerization, Google OAuth, and algorithmic scheduling.
